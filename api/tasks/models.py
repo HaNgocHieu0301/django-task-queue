@@ -1,6 +1,8 @@
 from django.db import models
 import uuid
-
+from django.utils import timezone
+from datetime import timedelta
+from typing import Any
 
 class TaskStatus(models.TextChoices):
     PENDING = "pending"
@@ -12,10 +14,10 @@ class TaskStatus(models.TextChoices):
 
 
 class TaskPriority(models.TextChoices):
-    LOW = "low"
-    NORMAL = "normal"
-    HIGH = "high"
-    URGENT = "urgent"
+    LOW = 1
+    NORMAL = 2
+    HIGH = 3
+    CRITICAL = 4 
 
 
 class Task(models.Model):
@@ -26,8 +28,7 @@ class Task(models.Model):
         choices=TaskStatus.choices,
         default=TaskStatus.PENDING,
     )
-    priority = models.CharField(
-        max_length=10,
+    priority = models.IntegerField(
         choices=TaskPriority.choices,
         default=TaskPriority.NORMAL,
     )
@@ -83,6 +84,55 @@ class Task(models.Model):
 
     def __str__(self):
         return f"Task {self.task_name} ({self.status})"
+
+    def to_dict(self):
+        return {
+            'task_id': str(self.id),
+            'task_name': self.task_name,
+            'args': self.args,
+            'kwargs': self.kwargs,
+            'priority': self.priority,
+            'queue_name': self.queue_name,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'retry_count': self.retry_count,
+            'retry_delay': self.retry_delay,
+            'error_message': self.error_message,
+        }
+    
+    def mark_as_processing(self, worker_id: str):
+        self.status = TaskStatus.PROCESSING
+        self.worker_id = worker_id
+        self.started_at = timezone.now()
+        self.save(update_fields=['status', 'worker_id', 'started_at'])
+
+    def mark_as_completed(self, result: Any = None):
+        self.status = TaskStatus.SUCCESS
+        self.completed_at = timezone.now()
+        self.result = result
+        self.save(update_fields=['status', 'completed_at', 'result'])
+
+    def mark_as_failed(self, error_message: str):
+        self.status = TaskStatus.FAILED
+        self.completed_at = timezone.now()
+        self.error_message = error_message
+        self.save(update_fields=['status', 'completed_at', 'error_message'])
+
+    def mark_for_retry(self):
+        self.status = TaskStatus.RETRY
+        self.retry_count += 1
+        self.next_retry_at = timezone.now() + timedelta(seconds=self.retry_delay)
+        self.save(update_fields=['status', 'retry_count', 'next_retry_at'])
+
+    def can_retry(self) -> bool:
+        # Kiểm tra số lần retry chưa vượt quá max_retries
+        if self.retry_count >= self.max_retries:
+            return False
+        
+        # Nếu có next_retry_at, kiểm tra đã đến thời gian retry chưa
+        if self.next_retry_at and self.next_retry_at > timezone.now():
+            return False
+            
+        return True
 
 
 class TaskLog(models.Model):

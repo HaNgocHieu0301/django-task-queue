@@ -18,7 +18,7 @@ class TestTasksAPI(APITestCase):
         # Tạo test data
         self.task_data = {
             "task_name": "test_task",
-            "priority": TaskPriority.HIGH,
+            "priority": "high",
             "args": ["arg1", "arg2"],
             "kwargs": {"key1": "value1", "key2": "value2"},
             "max_retries": 5,
@@ -88,7 +88,7 @@ class TestTasksAPI(APITestCase):
 
         # Test thiếu task_name
         invalid_data = {
-            "priority": TaskPriority.HIGH,
+            "priority": "high",
             "args": ["arg1"],
             "kwargs": {"key1": "value1"},
         }
