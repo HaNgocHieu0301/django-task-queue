@@ -3,6 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Python bytecode files (more specific patterns)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+*.cpython-*.pyc
+*.cpython-*.pyo
+
+# API specific Python cache files
+api/**/__pycache__/
+api/**/*.pyc
+api/**/*.pyo
+api/**/*.cpython-*.pyc
+
 # C extensions
 *.so
 

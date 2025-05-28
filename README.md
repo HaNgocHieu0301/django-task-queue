@@ -2,7 +2,7 @@
 
 A custom task queue system built with Django without using Celery or third-party task queue libraries. The system uses Redis and PostgreSQL for queue storage and management.
 
-## 🚀 Features
+## 🚀 BE Features
 
 - **Worker**: Background process to execute tasks
 - **Task Queue**: Store and manage pending tasks using Redis and PostgreSQL
@@ -11,7 +11,14 @@ A custom task queue system built with Django without using Celery or third-party
 - **Multiple Workers**: Support running multiple workers concurrently
 - **Priority Queue**: Support task priority (HIGH, NORMAL, LOW)
 - **Task Registry**: Automatic registration and management of task functions
-- **Monitoring**: API to monitor task status and queue statistics
+
+## 🚀 Frontend Features
+
+- ✅ **Real-time Task Monitoring** - View tasks and their status updates
+- ✅ **Task Creation Interface** - Create new tasks through UI
+- ✅ **Queue Statistics** - Visual dashboard for queue metrics
+- ✅ **Task Filtering** - Filter tasks by status, priority, etc.
+- ✅ **Auto-refresh** - Automatically polls for task updates
 
 ## 🏗️ Architecture
 
@@ -55,54 +62,9 @@ docker-compose exec django python manage.py migrate
 docker-compose exec django python manage.py createsuperuser
 ```
 
-**Note**: Worker is automatically started with docker-compose and will process tasks from the `default` queue.
+**NOTE**: Worker is automatically started with docker-compose and will process tasks from the `default` queue.
 
-### 3. Check services
-
-- Django API: http://localhost:8000
-- Frontend (if running locally): http://localhost:5173
-- Redis: localhost:6379
-- PostgreSQL: localhost:5432
-- Worker: Automatically running in background
-
-## 🎯 Usage
-
-### 1. Create Task Functions
-
-Create task functions in `tasks/sample_tasks.py`:
-
-```python
-from django_task_queue.task_registry import task_registry
-
-@task_registry.register('my_task')
-def my_task_function(arg1, arg2):
-    """
-    Task function description
-    """
-    # Process logic
-    result = arg1 + arg2
-    return result
-```
-
-### 2. Create Task via API
-
-```bash
-# POST /api/tasks/
-curl -X POST http://localhost:8000/api/tasks/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task_name": "add_numbers",
-    "args": [10, 20],
-    "priority": "high",
-    "max_retries": 3
-  }'
-```
-
-**The worker will automatically process the task within seconds.**
-
-## 🎨 Frontend (Task Queue Visualizer)
-
-### Run Frontend Locally
+### 3. Run Frontend Locally
 
 The project includes a React frontend with TypeScript and Vite for visualizing and managing tasks.
 
@@ -117,28 +79,61 @@ npm install
 # Ensure Django API is running: docker-compose up -d --build
 npm run dev
 ```
-
-**Frontend will be available at:** http://localhost:5173
-
-### Frontend Features
-
-- ✅ **Real-time Task Monitoring** - View tasks and their status updates
-- ✅ **Task Creation Interface** - Create new tasks through UI
-- ✅ **Queue Statistics** - Visual dashboard for queue metrics
-- ✅ **Task Filtering** - Filter tasks by status, priority, etc.
-- ✅ **Auto-refresh** - Automatically polls for task updates
-
-### Frontend Configuration
-
 The frontend connects to Django API at `http://localhost:8000/api`. 
 
-**API Configuration in `client/constants.ts`:**
+**NOTE:** API Configuration in `client/constants.ts`:
 ```typescript
 export const API_BASE_URL = 'http://localhost:8000/api';
 export const API_POLL_INTERVAL = 3000; // ms
 ```
 
-**Make sure Django API is running before starting frontend:**
+### 4. Check services
+
+- Django API: http://localhost:8000
+- Frontend (if running locally): http://localhost:5173
+- Redis: localhost:6379
+- PostgreSQL: localhost:5432
+- Worker: Automatically running in background
+
+## 🎯 Usage
+
+### 1. Create Task Functions
+
+Create task functions in `tasks/sample_tasks.py` like:
+
+```python
+from django_task_queue.task_registry import task_registry
+
+@task_registry.register('my_task')
+def my_task_function(arg1, arg2):
+    """
+    Task function description
+    """
+    # Process logic
+    result = arg1 + arg2
+    return result
+```
+
+### 2. Create Task
+#### 2.1. Via API
+
+```bash
+# POST /api/tasks/
+curl -X POST http://localhost:8000/api/tasks/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_name": "add_numbers",
+    "args": [10, 20],
+    "priority": "high",
+    "max_retries": 3
+  }'
+```
+
+The worker will automatically process the task within seconds.
+
+#### 2.1. Via FE
+Interact directly in UI at: http://localhost:5173
+
 
 ### 3. Worker Management
 
@@ -242,10 +237,10 @@ docker-compose exec django python demo_task_queue.py
   "args": [],                      // Optional: Arguments array
   "kwargs": {},                    // Optional: Keyword arguments
   "priority": "high|normal|low",   // Optional: Task priority
-  "max_retries": 3,               // Optional: Max retry attempts
-  "retry_delay": 60,              // Optional: Retry delay in seconds
-  "timeout": 300,                 // Optional: Task timeout in seconds
-  "queue_name": "string"          // Optional: Queue name
+  "max_retries": 3,                // Optional: Max retry attempts
+  "retry_delay": 60,               // Optional: Retry delay in seconds
+  "timeout": 300,                  // Optional: Task timeout in seconds
+  "queue_name": "string"           // Optional: Queue name
 }
 ```
 
@@ -281,10 +276,10 @@ The system includes 4 services:
 
 ```yaml
 services:
-  django:          # Django API server
-  worker-default:  # Task worker (auto-started)
-  redis:          # Message broker
-  postgres:       # Database
+  django:           # Django API server
+  worker-default:   # Task worker (auto-started)
+  redis:            # Message broker
+  postgres:         # Database
 ```
 
 **Worker service configuration:**
