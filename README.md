@@ -34,10 +34,11 @@ docker-compose exec django python manage.py createsuperuser
 docker-compose exec django python manage.py test tests.test_redis_connection
 
 # Run all Database tests
-docker-compose exec django python manage.py test tests.test_database_connection
+docker-compose exec django python manage.py test tests.test_database_connection -v 2
 
-# Run both test files
-docker-compose exec django python manage.py test tests.test_redis_connection tests.test_database_connection
+# Run test API
+docker-compose exec django python manage.py test tasks.tests -v 2
+
 ```
 
 ## 🐳 Docker Services
@@ -53,22 +54,32 @@ docker-compose exec django python manage.py test tests.test_redis_connection tes
 ```
 ├── api/                        # Django Backend API
 │   ├── django_task_queue/      # Main Django project
+│   │   ├── __init__.py         # Package initialization
 │   │   ├── settings.py         # Django settings with PostgreSQL support
 │   │   ├── urls.py             # URL configuration
 │   │   ├── wsgi.py             # WSGI configuration
+│   │   ├── asgi.py             # ASGI configuration
 │   │   └── redis_client.py     # Redis client wrapper
-│   ├── tasks/                  # Django app
-│   │   ├── models.py           # Database models
-│   │   ├── views.py            # API views
-│   │   └── urls.py             # App URLs
-│   ├── tests/                  # Test files
+│   ├── tasks/                  # Django app for task management
+│   │   ├── __init__.py         # App package initialization
+│   │   ├── models.py           # Task database models
+│   │   ├── views.py            # API views (TaskViewSet)
+│   │   ├── serializers.py      # DRF serializers
+│   │   ├── urls.py             # App URLs
+│   │   ├── admin.py            # Django admin configuration
+│   │   ├── apps.py             # App configuration
+│   │   ├── tests.py            # Task-specific tests
+│   │   └── migrations/         # Database migrations
+│   ├── tests/                  # Comprehensive test suite
 │   │   ├── __init__.py         # Tests package
+│   │   ├── apps.py             # Test app configuration
 │   │   ├── test_redis_connection.py    # Redis connection tests
 │   │   └── test_database_connection.py # Database connection tests
+│   ├── __init__.py             # API package initialization
 │   ├── Dockerfile              # Django container definition
 │   ├── requirements.txt        # Python dependencies
 │   └── manage.py               # Django management script
-├── client/                     # Frontend (React/Vue/etc.)
+├── client/                     # Frontend
 ├── docker-compose.yaml         # Docker services configuration
 └── README.md                   # This file
 ```

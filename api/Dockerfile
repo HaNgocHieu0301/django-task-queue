@@ -30,19 +30,16 @@ ENV PYTHONDONTWRITEBYTECODE=1
 WORKDIR /code
 
 COPY ./requirements.txt .
-# RUN python3 -m pip install --upgrade pip setuptools wheel
+
 RUN python -m pip install --upgrade cython
 RUN python -m pip install cryptography
 RUN python -m pip install -r requirements.txt
 
 RUN mkdir /config
 
-# Trong development, code sẽ được mount từ volume
-# Chỉ copy code khi build cho production
-COPY . .
+# COPY . .
 
 EXPOSE 8000
 
-# Sử dụng development server với auto-reload
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
