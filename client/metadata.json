@@ -1,0 +1,5 @@
+
+{
+  "name": "Task Queue Visualizer",
+  "description": "A React application to visualize and simulate a task queue system. Users can add tasks, see them processed, and view their status. This is a frontend simulation and does not include backend logic or database integration."
+}

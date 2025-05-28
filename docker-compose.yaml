@@ -26,6 +26,34 @@ services:
     networks:
       - default
 
+  # Worker for default queue
+  worker-default:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    command: python manage.py run_worker --queue=default --workers=3 --log-level=INFO
+    volumes:
+      - ./api:/code
+    depends_on:
+      - redis
+      - postgres
+      - django
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - DJANGO_SETTINGS_MODULE=django_task_queue.settings
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_password
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - default
+
   # Redis
   redis:
     image: redis:latest

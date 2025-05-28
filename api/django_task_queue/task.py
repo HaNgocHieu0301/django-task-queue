@@ -2,7 +2,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from .task_status import TaskStatus, TaskPriority
+from tasks.models import TaskStatus, TaskPriority
 
 
 class Task:
